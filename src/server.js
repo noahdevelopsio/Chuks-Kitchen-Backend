@@ -20,12 +20,12 @@ app.get('/', (req, res) => {
 // Import Routes
 const userRoutes = require('./routes/userRoutes');
 const foodRoutes = require('./routes/foodRoutes');
-// const orderRoutes = require('./routes/orderRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 // Mount Routes
 app.use('/api/users', userRoutes);
 app.use('/api/foods', foodRoutes);
-// app.use('/api/orders', orderRoutes);
+app.use('/api/orders', orderRoutes);
 
 // 404 Handler
 app.use((req, res) => {
