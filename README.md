@@ -2,7 +2,18 @@
 A Backend API and System Design for the Chuks Kitchen food ordering platform.
 
 ## 1. System Overview
-This project is a conceptually designed and partially implemented backend service for the Chuks Kitchen digitial food ordering platform. The system facilitates customer interactions such as registering for an account, browsing available food items, adding items to a cart, placing orders, and tracking order statuses. Behind the scenes, the API leverages Node.js (Express) with an in-memory data store for simplified testing and immediate usability.
+This project is a conceptually designed and partially implemented backend service for the Chuks Kitchen digital food ordering platform. The system facilitates customer interactions such as registering for an account, browsing available food items, adding items to a cart, placing orders, and tracking order statuses. Behind the scenes, the API leverages Node.js (Express) with an in-memory data store for simplified testing and immediate usability.
+
+**How Frontend Communicates with Backend**
+Conceptually, the frontend (e.g., React or React Native app) communicates with this backend via RESTful HTTP APIs. 
+- **Requests:** The frontend sends HTTP requests (GET, POST) containing JSON payloads (like form data or cart items) and necessary headers (e.g., `Content-Type: application/json`).
+- **Responses:** The backend processes the logic and returns HTTP status codes (like `200 OK`, `201 Created`, or `400 Bad Request`) along with a structured JSON response containing the requested data or error messages.
+
+**Implemented APIs**
+To fulfill the deliverable, the following 3 API groups (totaling 6 endpoints) were implemented:
+1. **Option A (User API):** `POST /api/users/signup` and `POST /api/users/verify`
+2. **Option B (Food/Menu API):** `GET /api/foods` and `POST /api/foods`
+3. **Option C (Order API):** `POST /api/orders` and `GET /api/orders/:id`
 
 ## 2. Backend Flow Diagrams
 
@@ -18,27 +29,27 @@ sequenceDiagram
 
     Frontend->>Route: POST /api/users/signup (email, phone, password)
     Route->>Controller: signupUser()
-    Controller->>DataStore: Check if user exists
-    alt User exists
-        DataStore-->>Controller: Return Conflict
-        Controller-->>Frontend: 400 Bad Request
-    else New User
-        Controller->>DataStore: Create user (isVerified: false)
-        DataStore-->>Controller: Return User ID
-        Controller-->>Frontend: 201 Created (Prompt for OTP)
-    end
+    Controller->>DataStore: Check if user exists & Create user
+    DataStore-->>Controller: Return User ID
+    Controller-->>Frontend: 201 Created (Prompt for OTP)
 
     Frontend->>Route: POST /api/users/verify (otp)
     Route->>Controller: verifyUser()
-    Controller->>DataStore: Retrieve User
-    Controller->>Controller: Simulate OTP Check
-    alt OTP valid
-        Controller->>DataStore: Update (isVerified: true)
-        Controller-->>Frontend: 200 OK (Verified)
-    else OTP invalid
-        Controller-->>Frontend: 400 Bad Request (Invalid/Expired OTP)
-    end
+    Controller->>DataStore: Retrieve User & Simulate OTP Check
+    Controller->>DataStore: Update (isVerified: true)
+    Controller-->>Frontend: 200 OK (Verified)
 ```
+
+#### Flow Explanation (Step-by-Step)
+1. The user submits their email, phone, and password through the frontend.
+2. The `/api/users/signup` route checks if the user exists. If so, a 400 error is returned. If not, the user is saved with `isVerified: false`.
+3. The API returns a `201 Created` status, prompting the frontend to ask for an OTP.
+4. The user submits the OTP to `/api/users/verify`.
+5. The API validates the code. If valid, `isVerified` becomes true, enabling full access.
+
+#### Data Required for Screen
+- **Inputs Expected:** `email` (or `phone`), `password`, `otp` (for verification step), and optionally `referralCode`.
+- **Returned Data:** `userId`, success/error messages, and a verification token upon success.
 
 ### Ordering Flow Explanation
 The ordering flow handles validating cart items against current database availability and prices before finalizing a pending order.
@@ -52,16 +63,21 @@ sequenceDiagram
 
     Customer->>OrderAPI: POST /api/orders (customerId, cartItems)
     OrderAPI->>FoodDB: Check availability & price for each item
-    alt Item unavailable / Price mismatch
-        FoodDB-->>OrderAPI: Return Error
-        OrderAPI-->>Customer: 400 Bad Request (Invalid Cart)
-    else All Items Valid
-        OrderAPI->>OrderAPI: Calculate Total Amount
-        OrderAPI->>OrderDB: Create Order (Status: Pending)
-        OrderDB-->>OrderAPI: Order ID
-        OrderAPI-->>Customer: 201 Created (Order Pending)
-    end
+    OrderAPI->>OrderAPI: Calculate Total Amount
+    OrderAPI->>OrderDB: Create Order (Status: Pending)
+    OrderDB-->>OrderAPI: Order ID
+    OrderAPI-->>Customer: 201 Created (Order Pending)
 ```
+
+#### Flow Explanation (Step-by-Step)
+1. The frontend gathers the user's cart items and ID and sends a `POST` request to `/api/orders`.
+2. The backend loops through every cart item and checks the database to ensure the food `isAvailable` and prices match.
+3. If any item is unavailable, a `400 Bad Request` error stops the transaction, preventing incorrect payments.
+4. If valid, the backend calculates the final `totalAmount` itself (never trusting frontend prices) and creates the order as `Pending`.
+
+#### Data Required for Screen
+- **Inputs Expected:** `customerId` and an array of `items` (which include `foodId` and `quantity`).
+- **Returned Data:** `orderId`, backend-calculated `totalAmount`, and order `status`.
 
 ## 3. Data Modeling (ERD)
 
