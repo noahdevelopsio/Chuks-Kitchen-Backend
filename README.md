@@ -15,6 +15,43 @@ To fulfill the deliverable, the following 3 API groups (totaling 6 endpoints) we
 2. **Option B (Food/Menu API):** `GET /api/foods` and `POST /api/foods`
 3. **Option C (Order API):** `POST /api/orders` and `GET /api/orders/:id`
 
+## 2. Environment Setup & Running the Project
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- npm (Node Package Manager)
+
+### Dependencies Used
+- **express**: Fast, unopinionated, minimalist web framework for routing.
+- **cors**: Middleware to allow Cross-Origin Resource Sharing.
+- **dotenv**: Loads environment variables from a `.env` file into `process.env`.
+- **uuid**: Generates unique identifiers for users, foods, and orders.
+- **nodemon** (Dev Dependency): Automatically restarts the node application when file changes in the directory are detected.
+
+### Installation & Execution Steps
+
+1. **Clone the repository or extract the ZIP file**
+   ```bash
+   git clone https://github.com/noahdevelopsio/Chuks-Kitchen-Backend.git
+   cd Chuks-Kitchen-Backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Test the API**
+   The server will run on `http://localhost:3000`. You can test the endpoints using Postman, Insomnia, or cURL. For example:
+   ```bash
+   curl -X GET http://localhost:3000/api/foods
+   ```
+
 ## 2. Backend Flow Diagrams
 
 ### User Registration & Access Flow
